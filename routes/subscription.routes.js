@@ -17,7 +17,10 @@ router.post(
 // Manual subscription management (if not using Stripe)
 router.post(
   "/subscribe",
-  [body("planId").optional().withMessage("Plan ID is optional")],
+  [
+    // Fix: Add a validation before using optional()
+    body("planId").exists().optional(),
+  ],
   validateRequest,
   subscriptionController.subscribe
 );
