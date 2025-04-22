@@ -14,6 +14,11 @@ router.post(
   subscriptionController.createCheckoutSession
 );
 
+router.get(
+  "/checkout-session",
+  subscriptionController.createCustomerPortalSession
+);
+
 // Manual subscription management (if not using Stripe)
 router.post(
   "/subscribe",
