@@ -212,3 +212,4 @@
 ::1 - - [22/Apr/2025:18:15:50 +0000] "GET /api/transactions HTTP/1.1" 200 724 "-" "PostmanRuntime/7.39.1"
 ::1 - - [22/Apr/2025:18:16:15 +0000] "GET /api/transactions HTTP/1.1" 200 724 "-" "PostmanRuntime/7.39.1"
 ::1 - - [22/Apr/2025:18:16:40 +0000] "GET /api/transactions HTTP/1.1" 200 724 "-" "PostmanRuntime/7.39.1"
+::1 - - [22/Apr/2025:18:31:06 +0000] "POST /api/subscriptions/create-checkout-session HTTP/1.1" 200 465 "-" "PostmanRuntime/7.39.1"
