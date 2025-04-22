@@ -264,7 +264,7 @@ exports.getTransactions = async (req, res) => {
   }
 };
 
-// Get invoice
+// Get invoice for a specific period
 exports.getInvoice = async (req, res) => {
   try {
     const { start, end } = req.query;
@@ -272,6 +272,9 @@ exports.getInvoice = async (req, res) => {
     // Parse dates
     const startDate = new Date(start);
     const endDate = new Date(end);
+
+    // Set endDate to end of day
+    endDate.setHours(23, 59, 59, 999);
 
     // Validate date range
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -284,35 +287,85 @@ exports.getInvoice = async (req, res) => {
         .json({ error: "Start date must be before end date" });
     }
 
-    // Generate mock transactions for the date range
-    const mockTransactions = generateMockTransactions(req.user.id, 30).filter(
-      (t) => {
-        const txDate = new Date(t.timestamp);
-        return txDate >= startDate && txDate <= endDate;
-      }
-    );
+    // Get user transactions from the database for the specified period
+    const transactions = await Transaction.find({
+      $or: [{ user: req.user.id }, { recipient: req.user.id }],
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    })
+      .sort({ createdAt: -1 })
+      .populate("user", "name email")
+      .populate("recipient", "name email");
 
-    // Calculate summary
-    const totalTransactions = mockTransactions.length;
-    const totalAmount = mockTransactions.reduce(
-      (sum, tx) => sum + tx.amount,
-      0
-    );
+    // Format the transactions for the response
+    const formattedTransactions = transactions.map((tx) => {
+      const isOutgoing = tx.user._id.toString() === req.user.id;
+
+      return {
+        id: tx._id,
+        reference: tx.reference,
+        type: tx.transactionType,
+        amount: tx.amount,
+        currency: tx.currency,
+        description: tx.description || "",
+        notes: tx.notes || "",
+        timestamp: tx.createdAt,
+        formattedDate: new Date(tx.createdAt).toLocaleString(),
+        status: tx.status,
+        // For transfers, show the other party
+        counterparty: isOutgoing
+          ? tx.recipient
+            ? {
+                id: tx.recipient._id,
+                name: tx.recipient.name,
+                email: tx.recipient.email,
+              }
+            : null
+          : { id: tx.user._id, name: tx.user.name, email: tx.user.email },
+        // For display purposes, indicate if money was sent or received
+        direction: isOutgoing ? "outgoing" : "incoming",
+        balanceAfter: isOutgoing
+          ? tx.senderBalanceAfter
+          : tx.recipientBalanceAfter,
+      };
+    });
+
+    // Calculate summary statistics
+    const totalTransactions = formattedTransactions.length;
+
+    // Only consider amount relevant to this user (positive for incoming, negative for outgoing)
+    const totalAmount = formattedTransactions.reduce((sum, tx) => {
+      if (tx.direction === "incoming") {
+        return sum + tx.amount;
+      } else {
+        return sum - tx.amount;
+      }
+    }, 0);
+
     const avgAmount =
-      totalTransactions > 0 ? totalAmount / totalTransactions : 0;
+      totalTransactions > 0 ? Math.abs(totalAmount) / totalTransactions : 0;
 
     // Group by type
-    const depositCount = mockTransactions.filter(
-      (t) => t.type === "deposit"
-    ).length;
-    const withdrawalCount = mockTransactions.filter(
-      (t) => t.type === "withdrawal"
-    ).length;
-    const transferCount = mockTransactions.filter(
-      (t) => t.type === "transfer"
-    ).length;
+    const transactionsByType = formattedTransactions.reduce((acc, tx) => {
+      acc[tx.type] = (acc[tx.type] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Get user info
+    const user = await User.findById(req.user.id);
 
     res.json({
+      invoiceInfo: {
+        invoiceNumber: `INV-${Date.now().toString().substring(5)}`,
+        generatedDate: new Date().toISOString(),
+        userDetails: {
+          name: user.name,
+          email: user.email,
+          id: user._id,
+        },
+      },
       dateRange: {
         start: startDate.toISOString().split("T")[0],
         end: endDate.toISOString().split("T")[0],
@@ -320,14 +373,12 @@ exports.getInvoice = async (req, res) => {
       summary: {
         totalTransactions,
         totalAmount: parseFloat(totalAmount.toFixed(2)),
+        netChange: parseFloat(totalAmount.toFixed(2)),
         avgAmount: parseFloat(avgAmount.toFixed(2)),
+        currentBalance: user.balance,
       },
-      breakdown: {
-        deposits: depositCount,
-        withdrawals: withdrawalCount,
-        transfers: transferCount,
-      },
-      transactions: mockTransactions,
+      breakdown: transactionsByType,
+      transactions: formattedTransactions,
     });
   } catch (error) {
     console.error("Error generating invoice:", error);
