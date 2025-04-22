@@ -84,7 +84,7 @@ module.exports = {
     }
 
     try {
-      const subscription = await stripe.subscriptions.del(subscriptionId);
+      const subscription = await stripe.subscriptions.cancel(subscriptionId);
       return subscription;
     } catch (error) {
       console.error("Error canceling subscription:", error);

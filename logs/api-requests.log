@@ -5,3 +5,9 @@
 {"timestamp":"2025-04-22T11:58:21.937Z","userId":"6807834448415f67d817249a","method":"GET","url":"/api/admin/users","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
 {"timestamp":"2025-04-22T12:34:36.278Z","userId":"68078970f08cecda1bf5e1a8","method":"POST","url":"/api/transfer","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
 {"timestamp":"2025-04-22T12:37:01.664Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/balance","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:39:07.563Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/transactions","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:43:21.361Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/invoice?start=2025-04-01&end=2025-04-20","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:43:40.512Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/invoice?start=2025-04-01&end=2025-04-22","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:43:41.360Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/invoice?start=2025-04-01&end=2025-04-22","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:43:53.310Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/invoice?start=2025-04-01&end=2025-04-22","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T12:44:01.741Z","userId":"68078970f08cecda1bf5e1a8","method":"GET","url":"/api/transactions","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
