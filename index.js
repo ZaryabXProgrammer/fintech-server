@@ -9,6 +9,7 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 const path = require("path");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
 // Import routes
@@ -37,6 +38,15 @@ const accessLogStream = fs.createWriteStream(path.join(logDir, "access.log"), {
 
 // Security middleware
 app.use(helmet()); // Set various HTTP headers for security
+app.use(
+  bodyParser.json({
+    verify: function (req, res, buf) {
+      if (req.originalUrl === "/api/webhooks") {
+        req.rawBody = buf.toString();
+      }
+    },
+  })
+);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",

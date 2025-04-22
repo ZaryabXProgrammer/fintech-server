@@ -31,4 +31,7 @@ router.post("/cancel", subscriptionController.cancelSubscription);
 // Get subscription status
 router.get("/status", subscriptionController.getSubscriptionStatus);
 
+//Webhook route for Stripe events
+// router.post("/webhook", subscriptionController.handleWebhook);
+
 module.exports = router;

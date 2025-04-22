@@ -13,7 +13,7 @@ router.post("/stripe", parseRawBody, async (req, res) => {
 
     // Verify webhook signature
     const event = stripeConfig.verifyWebhookSignature(
-      req.body,
+      req.rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );

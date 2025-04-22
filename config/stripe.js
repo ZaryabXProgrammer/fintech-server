@@ -28,6 +28,7 @@ module.exports = {
         mode: "subscription",
         success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
+        // metadata: { userId: userId, priceId: priceId },
       });
 
       return session;
