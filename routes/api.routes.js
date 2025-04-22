@@ -10,9 +10,9 @@ const validateRequest = require("../middlewares/validate-request");
 
 // Apply middlewares to all API routes
 router.use(authMiddleware);
-router.use(subscriptionMiddleware);
-router.use(rateLimitMiddleware);
-router.use(loggerMiddleware);
+// router.use(subscriptionMiddleware);
+// router.use(rateLimitMiddleware);
+// router.use(loggerMiddleware);
 
 // Get balance
 router.get("/balance", apiController.getBalance);

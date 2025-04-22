@@ -6,11 +6,23 @@ const bcrypt = require("bcrypt");
 // Get all users
 exports.getAllUsers = async (req, res) => {
   try {
-    // Find all users but exclude password field
+
     const users = await User.find().select("-password");
 
+    const totalUsers = users.length;
+    const activeUsers = users.filter((user) => user.subscribed).length;
+    const proSubscribers = users.filter((user) => user.subscribed).length; // or check `user.role === 'pro'`
+
+    const currentMonth = new Date().getMonth();
+    const newThisMonth = users.filter(
+      (user) => new Date(user.createdAt).getMonth() === currentMonth
+    ).length;
+
     res.json({
-      count: users.length,
+      totalUsers,
+      activeUsers,
+      proSubscribers,
+      newThisMonth,
       users,
     });
   } catch (error) {
@@ -18,6 +30,7 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve users" });
   }
 };
+
 
 // Force cancel a user's subscription
 exports.cancelUserSubscription = async (req, res) => {
