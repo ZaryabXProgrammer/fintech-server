@@ -193,7 +193,7 @@ router.post(
 );
 
 router.get(
-  "/checkout-session",
+  "/billing-portal",
   subscriptionController.createCustomerPortalSession
 );
 

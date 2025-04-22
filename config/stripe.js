@@ -26,8 +26,8 @@ module.exports = {
           },
         ],
         mode: "subscription",
-        success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
+        success_url: `${process.env.FRONTEND_URL}/dashboard/overview?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.FRONTEND_URL}/`,
         // metadata: { userId: userId, priceId: priceId },
       });
 
@@ -101,7 +101,7 @@ module.exports = {
     try {
       const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: `${process.env.FRONTEND_URL}/account`,
+        return_url: `${process.env.FRONTEND_URL}/dashboard/overview`,
       });
 
       return session;
