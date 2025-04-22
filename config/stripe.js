@@ -91,4 +91,23 @@ module.exports = {
       throw error;
     }
   },
+
+  // Create a billing portal session
+  createBillingPortalSession: async (customerId) => {
+    if (!stripe) {
+      throw new Error("Stripe is not configured");
+    }
+
+    try {
+      const session = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${process.env.FRONTEND_URL}/account`,
+      });
+
+      return session;
+    } catch (error) {
+      console.error("Error creating billing portal session:", error);
+      throw error;
+    }
+  },
 };
