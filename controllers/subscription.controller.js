@@ -167,7 +167,7 @@ exports.handleWebhook = async (req, res) => {
 
     // Verify webhook signature
     const event = stripeConfig.verifyWebhookSignature(
-      req.body,
+      req.rawBody,
       signature,
       endpointSecret
     );
