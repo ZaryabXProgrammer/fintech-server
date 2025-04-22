@@ -1,4 +1,6 @@
 const User = require("../models/user.model");
+const Transaction = require("../models/transaction.model");
+const { v4: uuidv4 } = require("uuid");
 
 // Helper to generate a random transaction
 const generateMockTransaction = (
@@ -87,16 +89,13 @@ exports.getBalance = async (req, res) => {
 // Transfer funds
 exports.transfer = async (req, res) => {
   try {
-    const { sourceId, destinationId, amount } = req.body;
+    const { destinationId, amount } = req.body;
 
     // Validate amount
     const transferAmount = parseFloat(amount);
     if (isNaN(transferAmount) || transferAmount <= 0) {
       return res.status(400).json({ error: "Invalid transfer amount" });
     }
-
-    // In a real app, we would verify both accounts and update balances
-    // For this sandbox, we'll use mock data
 
     // Get source user (current user)
     const sourceUser = await User.findById(req.user.id);
@@ -109,42 +108,75 @@ exports.transfer = async (req, res) => {
       return res.status(400).json({ error: "Insufficient balance" });
     }
 
-    // Simulate destination user
-    let destinationUser = null;
+    // Validate destination user
     if (destinationId === req.user.id) {
       return res.status(400).json({ error: "Cannot transfer to same account" });
-    } else {
-      // Check if destination exists (could be another user in your system)
-      destinationUser = await User.findById(destinationId);
-      if (!destinationUser) {
-        return res.status(404).json({ error: "Destination account not found" });
-      }
+    }
+
+    // Check if destination exists
+    const destinationUser = await User.findById(destinationId);
+    if (!destinationUser) {
+      return res.status(404).json({ error: "Destination account not found" });
     }
 
     // Update balances
     sourceUser.balance -= transferAmount;
     destinationUser.balance += transferAmount;
 
-    // Save changes
-    await sourceUser.save();
-    await destinationUser.save();
+    // Generate a unique reference for the transaction
+    const reference = `TRF-${uuidv4().substring(0, 8)}-${Date.now()
+      .toString()
+      .substring(9)}`;
 
-    // Create mock transaction for response
-    const transaction = {
-      id: Math.random().toString(36).substring(2, 15),
-      sourceId,
-      destinationId,
+    // Create a new transaction record
+    const transaction = new Transaction({
+      user: sourceUser._id, // Sender
+      recipient: destinationUser._id, // Recipient
+      transactionType: "transfer",
       amount: transferAmount,
-      timestamp: new Date(),
+      currency: "USD",
       status: "completed",
       description: req.body.description || "Funds transfer",
-    };
+      reference,
+      senderBalanceAfter: sourceUser.balance,
+      recipientBalanceAfter: destinationUser.balance,
+      notes: req.body.notes || null,
+    });
+
+    // Save all changes within a transaction
+    await Promise.all([
+      sourceUser.save(),
+      destinationUser.save(),
+      transaction.save(),
+    ]);
 
     res.json({
       success: true,
       message: "Transfer completed successfully",
-      transaction,
-      sourceBalance: sourceUser.balance,
+      transaction: {
+        id: transaction._id,
+        reference: transaction.reference,
+        transactionType: transaction.transactionType,
+        amount: transaction.amount,
+        currency: transaction.currency,
+        timestamp: transaction.createdAt,
+        formattedDate: new Date(transaction.createdAt).toLocaleString(),
+        status: transaction.status,
+        description: transaction.description,
+        notes: transaction.notes,
+      },
+      sender: {
+        id: sourceUser._id,
+        name: sourceUser.name,
+        email: sourceUser.email,
+        balanceAfter: sourceUser.balance,
+      },
+      recipient: {
+        id: destinationUser._id,
+        name: destinationUser.name,
+        email: destinationUser.email,
+        balanceAfter: destinationUser.balance,
+      },
     });
   } catch (error) {
     console.error("Error processing transfer:", error);
@@ -158,22 +190,72 @@ exports.getTransactions = async (req, res) => {
     // Parse pagination parameters
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
+    const skip = (page - 1) * pageSize;
 
-    // Generate mock transactions
-    const allTransactions = generateMockTransactions(req.user.id, 50);
+    // Get filter parameters
+    const type = req.query.type; // Optional transaction type filter
 
-    // Apply pagination
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedTransactions = allTransactions.slice(startIndex, endIndex);
+    // Build query
+    const query = {
+      $or: [
+        { user: req.user.id }, // Transactions where user is the sender
+        { recipient: req.user.id }, // Transactions where user is the recipient
+      ],
+    };
+
+    // Add type filter if provided
+    if (type) {
+      query.transactionType = type;
+    }
+
+    // Get total count
+    const totalItems = await Transaction.countDocuments(query);
+
+    // Get transactions with pagination
+    const transactions = await Transaction.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .populate("user", "name email")
+      .populate("recipient", "name email");
+
+    // Format the transactions for the response
+    const formattedTransactions = transactions.map((tx) => {
+      const isOutgoing = tx.user._id.toString() === req.user.id;
+
+      return {
+        id: tx._id,
+        reference: tx.reference,
+        type: tx.transactionType,
+        amount: tx.amount,
+        currency: tx.currency,
+        description: tx.description,
+        timestamp: tx.createdAt,
+        status: tx.status,
+        // For transfers, show the other party
+        counterparty: isOutgoing
+          ? tx.recipient
+            ? {
+                id: tx.recipient._id,
+                name: tx.recipient.name,
+              }
+            : null
+          : { id: tx.user._id, name: tx.user.name },
+        // For display purposes, indicate if money was sent or received
+        direction: isOutgoing ? "outgoing" : "incoming",
+        balanceAfter: isOutgoing
+          ? tx.senderBalanceAfter
+          : tx.recipientBalanceAfter,
+      };
+    });
 
     res.json({
-      transactions: paginatedTransactions,
+      transactions: formattedTransactions,
       pagination: {
         page,
         pageSize,
-        totalPages: Math.ceil(allTransactions.length / pageSize),
-        totalItems: allTransactions.length,
+        totalPages: Math.ceil(totalItems / pageSize),
+        totalItems: totalItems,
       },
     });
   } catch (error) {

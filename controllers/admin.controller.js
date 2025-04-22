@@ -29,13 +29,11 @@ exports.cancelUserSubscription = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     // Cancel subscription
     user.subscribed = false;
     user.stripeSubscriptionId = null;
     user.updatedAt = Date.now();
     await user.save();
-
     res.json({
       success: true,
       message: `Subscription canceled for user ${user.email}`,
