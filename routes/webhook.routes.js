@@ -1,3 +1,42 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Webhooks
+ *   description: Webhook endpoints for external services
+ */
+
+/**
+ * @swagger
+ * /api/webhooks/stripe:
+ *   post:
+ *     summary: Stripe webhook endpoint to receive subscription events
+ *     tags: [Webhooks]
+ *     description: >
+ *       Endpoint for Stripe to send webhook events about subscription changes.
+ *       This endpoint does not require authentication as it uses Stripe signature verification.
+ *     requestBody:
+ *       description: Raw webhook payload from Stripe
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Webhook received successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 received:
+ *                   type: boolean
+ *       400:
+ *         description: Invalid webhook signature or payload
+ *       500:
+ *         description: Server error
+ */
+
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user.model");

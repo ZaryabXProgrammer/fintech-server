@@ -10,6 +10,8 @@ const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 const path = require("path");
 const bodyParser = require("body-parser");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 require("dotenv").config();
 
 // Import routes
@@ -89,6 +91,9 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/webhooks", webhookRoutes); // Register webhook routes before other API routes
 app.use("/api", apiRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Swagger documentation route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Root route
 app.get("/", (req, res) => {

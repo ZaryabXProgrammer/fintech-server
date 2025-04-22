@@ -23,6 +23,9 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
     "stripe": "^18.0.0",
+    "swagger": "^0.7.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0"
   }
 }

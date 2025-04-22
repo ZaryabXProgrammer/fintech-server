@@ -1,3 +1,59 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Unique identifier (automatically generated)
+ *         name:
+ *           type: string
+ *           description: User's full name
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User's email address (unique)
+ *         password:
+ *           type: string
+ *           format: password
+ *           description: User's hashed password (not returned in queries)
+ *         role:
+ *           type: string
+ *           enum: [developer, admin, user]
+ *           default: user
+ *           description: User's role for access control
+ *         subscribed:
+ *           type: boolean
+ *           default: false
+ *           description: Whether the user has an active subscription
+ *         balance:
+ *           type: number
+ *           default: 1000
+ *           description: User's current account balance
+ *         stripeCustomerId:
+ *           type: string
+ *           nullable: true
+ *           description: Stripe customer ID if the user is registered with Stripe
+ *         stripeSubscriptionId:
+ *           type: string
+ *           nullable: true
+ *           description: Stripe subscription ID if the user has a Stripe subscription
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the user account was created
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the user account was last updated
+ */
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
