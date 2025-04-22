@@ -1,0 +1,5 @@
+{"timestamp":"2025-04-22T11:56:05.695Z","userId":"6807834448415f67d817249a","method":"POST","url":"/api/auth/create-mock-user","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T11:56:16.199Z","userId":"6807834448415f67d817249a","method":"POST","url":"/api/auth/create-mock-user","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T11:56:25.672Z","userId":"6807834448415f67d817249a","method":"POST","url":"/api/auth/create-mock-user","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T11:57:23.869Z","userId":"6807834448415f67d817249a","method":"POST","url":"/api/admin/create-mock-user","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+{"timestamp":"2025-04-22T11:58:21.937Z","userId":"6807834448415f67d817249a","method":"GET","url":"/api/admin/users","ip":"::1","userAgent":"PostmanRuntime/7.39.1"}

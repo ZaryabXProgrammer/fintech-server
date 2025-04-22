@@ -41,7 +41,7 @@ app.use(helmet()); // Set various HTTP headers for security
 app.use(
   bodyParser.json({
     verify: function (req, res, buf) {
-      if (req.originalUrl === "/api/webhooks") {
+      if (req.originalUrl === "/api/webhooks/stripe") {
         req.rawBody = buf.toString();
       }
     },
