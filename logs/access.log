@@ -80,3 +80,4 @@
 ::1 - - [22/Apr/2025:12:21:43 +0000] "POST /api/webhooks/stripe HTTP/1.1" 200 17 "-" "Stripe/1.0 (+https://stripe.com/docs/webhooks)"
 ::1 - - [22/Apr/2025:12:21:43 +0000] "POST /api/webhooks/stripe HTTP/1.1" 200 17 "-" "Stripe/1.0 (+https://stripe.com/docs/webhooks)"
 ::1 - - [22/Apr/2025:12:21:43 +0000] "POST /api/webhooks/stripe HTTP/1.1" 200 17 "-" "Stripe/1.0 (+https://stripe.com/docs/webhooks)"
+::1 - - [22/Apr/2025:12:32:38 +0000] "POST /api/auth/login HTTP/1.1" 200 438 "-" "PostmanRuntime/7.39.1"
