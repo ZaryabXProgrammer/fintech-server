@@ -221,7 +221,55 @@ exports.getTransactions = async (req, res) => {
 
     // Format the transactions for the response
     const formattedTransactions = transactions.map((tx) => {
-      const isOutgoing = tx.user._id.toString() === req.user.id;
+      // For transfer transactions, we need to determine if it's outgoing or incoming
+      let direction, counterparty, balanceAfter;
+
+      // First handle transfers
+      if (tx.transactionType === "transfer") {
+        // For transfers, check if user is sender
+        if (tx.user && tx.user._id.toString() === req.user.id) {
+          direction = "outgoing";
+          balanceAfter = tx.senderBalanceAfter;
+
+          // Counterparty is the recipient
+          if (tx.recipient) {
+            counterparty = {
+              id: tx.recipient._id,
+              name: tx.recipient.name,
+            };
+          }
+        }
+        // User is recipient
+        else if (tx.recipient && tx.recipient._id.toString() === req.user.id) {
+          direction = "incoming";
+          balanceAfter = tx.recipientBalanceAfter;
+
+          // Counterparty is the sender
+          if (tx.user) {
+            counterparty = {
+              id: tx.user._id,
+              name: tx.user.name,
+            };
+          }
+        }
+      }
+      // Handle deposit, withdrawal, fee, bonus, refund
+      else {
+        // For deposits, bonuses, refunds: incoming
+        if (["deposit", "bonus", "refund"].includes(tx.transactionType)) {
+          direction = "incoming";
+          balanceAfter = tx.recipientBalanceAfter || tx.senderBalanceAfter;
+          // No counterparty for these transaction types
+          counterparty = null;
+        }
+        // For withdrawals and fees: outgoing
+        else if (["withdrawal", "fee"].includes(tx.transactionType)) {
+          direction = "outgoing";
+          balanceAfter = tx.senderBalanceAfter;
+          // No counterparty for these transaction types
+          counterparty = null;
+        }
+      }
 
       return {
         id: tx._id,
@@ -232,20 +280,9 @@ exports.getTransactions = async (req, res) => {
         description: tx.description,
         timestamp: tx.createdAt,
         status: tx.status,
-        // For transfers, show the other party
-        counterparty: isOutgoing
-          ? tx.recipient
-            ? {
-                id: tx.recipient._id,
-                name: tx.recipient.name,
-              }
-            : null
-          : { id: tx.user._id, name: tx.user.name },
-        // For display purposes, indicate if money was sent or received
-        direction: isOutgoing ? "outgoing" : "incoming",
-        balanceAfter: isOutgoing
-          ? tx.senderBalanceAfter
-          : tx.recipientBalanceAfter,
+        counterparty: counterparty,
+        direction: direction,
+        balanceAfter: balanceAfter,
       };
     });
 
@@ -301,7 +338,57 @@ exports.getInvoice = async (req, res) => {
 
     // Format the transactions for the response
     const formattedTransactions = transactions.map((tx) => {
-      const isOutgoing = tx.user._id.toString() === req.user.id;
+      // For transfer transactions, we need to determine if it's outgoing or incoming
+      let direction, counterparty, balanceAfter;
+
+      // First handle transfers
+      if (tx.transactionType === "transfer") {
+        // For transfers, check if user is sender
+        if (tx.user && tx.user._id.toString() === req.user.id) {
+          direction = "outgoing";
+          balanceAfter = tx.senderBalanceAfter;
+
+          // Counterparty is the recipient
+          if (tx.recipient) {
+            counterparty = {
+              id: tx.recipient._id,
+              name: tx.recipient.name,
+              email: tx.recipient.email,
+            };
+          }
+        }
+        // User is recipient
+        else if (tx.recipient && tx.recipient._id.toString() === req.user.id) {
+          direction = "incoming";
+          balanceAfter = tx.recipientBalanceAfter;
+
+          // Counterparty is the sender
+          if (tx.user) {
+            counterparty = {
+              id: tx.user._id,
+              name: tx.user.name,
+              email: tx.user.email,
+            };
+          }
+        }
+      }
+      // Handle deposit, withdrawal, fee, bonus, refund
+      else {
+        // For deposits, bonuses, refunds: incoming
+        if (["deposit", "bonus", "refund"].includes(tx.transactionType)) {
+          direction = "incoming";
+          balanceAfter = tx.recipientBalanceAfter || tx.senderBalanceAfter;
+          // No counterparty for these transaction types
+          counterparty = null;
+        }
+        // For withdrawals and fees: outgoing
+        else if (["withdrawal", "fee"].includes(tx.transactionType)) {
+          direction = "outgoing";
+          balanceAfter = tx.senderBalanceAfter;
+          // No counterparty for these transaction types
+          counterparty = null;
+        }
+      }
 
       return {
         id: tx._id,
@@ -314,21 +401,9 @@ exports.getInvoice = async (req, res) => {
         timestamp: tx.createdAt,
         formattedDate: new Date(tx.createdAt).toLocaleString(),
         status: tx.status,
-        // For transfers, show the other party
-        counterparty: isOutgoing
-          ? tx.recipient
-            ? {
-                id: tx.recipient._id,
-                name: tx.recipient.name,
-                email: tx.recipient.email,
-              }
-            : null
-          : { id: tx.user._id, name: tx.user.name, email: tx.user.email },
-        // For display purposes, indicate if money was sent or received
-        direction: isOutgoing ? "outgoing" : "incoming",
-        balanceAfter: isOutgoing
-          ? tx.senderBalanceAfter
-          : tx.recipientBalanceAfter,
+        counterparty: counterparty,
+        direction: direction,
+        balanceAfter: balanceAfter,
       };
     });
 
